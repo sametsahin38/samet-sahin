@@ -1,5 +1,4 @@
 local QBCore = exports['qb-core']:GetCoreObject()
-local PlayerPhoneCache = {}
 
 local function CreatePhoneTables()
     MySQL.query([[
@@ -39,21 +38,44 @@ local function RandomPhoneNumber()
     return math.random(100, 999) .. math.random(1000, 9999)
 end
 
+local function BuildInstalledApps(settings)
+    local installed = settings.installedApps or {}
+    local appMap = {}
+
+    for _, app in ipairs(Config.CoreApps) do
+        table.insert(appMap, PhoneUtils.DeepCopy(app))
+    end
+
+    for _, app in ipairs(Config.StoreApps) do
+        if installed[app.id] then
+            table.insert(appMap, PhoneUtils.DeepCopy(app))
+        end
+    end
+
+    return appMap
+end
+
 local function ResolvePhoneProfile(citizenid)
     local profile = MySQL.single.await('SELECT * FROM phone_profiles WHERE citizenid = ?', { citizenid })
-    if profile then
-        return profile
-    end
+    if profile then return profile end
 
     local number
     repeat
         number = RandomPhoneNumber()
     until not MySQL.single.await('SELECT citizenid FROM phone_profiles WHERE phone_number = ?', { number })
 
+    local defaultSettings = {
+        wallpaper = Config.DefaultWallpaper,
+        installedApps = {
+            gallery = true,
+            twitter = true
+        }
+    }
+
     MySQL.insert.await('INSERT INTO phone_profiles (citizenid, phone_number, settings, contacts, notes) VALUES (?, ?, ?, ?, ?)', {
         citizenid,
         number,
-        json.encode({ wallpaper = Config.DefaultWallpaper, doNotDisturb = false }),
+        json.encode(defaultSettings),
         json.encode({}),
         json.encode({})
     })
@@ -69,7 +91,11 @@ local function BuildPhoneState(source)
     local profile = ResolvePhoneProfile(citizenid)
     if not profile then return nil end
 
-    local sent = MySQL.query.await('SELECT * FROM phone_messages WHERE sender = ? OR receiver = ? ORDER BY sent_at DESC LIMIT 100', {
+    local settings = json.decode(profile.settings or '{}') or {}
+    settings.installedApps = settings.installedApps or {}
+    settings.wallpaper = settings.wallpaper or Config.DefaultWallpaper
+
+    local sent = MySQL.query.await('SELECT * FROM phone_messages WHERE sender = ? OR receiver = ? ORDER BY sent_at DESC LIMIT 150', {
         profile.phone_number,
         profile.phone_number
     })
@@ -85,13 +111,16 @@ local function BuildPhoneState(source)
             citizenid = citizenid,
             phone = profile.phone_number
         },
-        settings = json.decode(profile.settings or '{}') or {},
+        settings = settings,
         contacts = json.decode(profile.contacts or '[]') or {},
         notes = json.decode(profile.notes or '[]') or {},
         messages = sent or {},
         gallery = gallery or {},
-        apps = PhoneUtils.DeepCopy(Config.DefaultApps),
-        mapLocations = Config.MapLocations
+        apps = BuildInstalledApps(settings),
+        coreApps = Config.CoreApps,
+        storeApps = Config.StoreApps,
+        mapLocations = Config.MapLocations,
+        wallpaperPresets = Config.WallpaperPresets
     }
 end
 
@@ -101,15 +130,11 @@ RegisterNetEvent('qb-smartphone:server:openPhone', function()
     if not player then return end
 
     if Config.EnableItemRequired and not player.Functions.GetItemByName(Config.PhoneItem) then
-        TriggerClientEvent('QBCore:Notify', src, 'Telefon esyasi gerekli.', 'error')
+        TriggerClientEvent('QBCore:Notify', src, 'Telefon eşyası gerekli.', 'error')
         return
     end
 
-    local state = BuildPhoneState(src)
-    if not state then return end
-
-    PlayerPhoneCache[src] = state
-    TriggerClientEvent('qb-smartphone:client:openPhone', src, state)
+    TriggerClientEvent('qb-smartphone:client:openPhone', src, BuildPhoneState(src))
 end)
 
 QBCore.Functions.CreateCallback('qb-smartphone:server:getPhoneState', function(source, cb)
@@ -120,32 +145,28 @@ RegisterNetEvent('qb-smartphone:server:saveSettings', function(settings)
     local src = source
     local player = QBCore.Functions.GetPlayer(src)
     if not player then return end
-    local citizenid = player.PlayerData.citizenid
-    MySQL.update('UPDATE phone_profiles SET settings = ? WHERE citizenid = ?', { json.encode(settings), citizenid })
+    MySQL.update('UPDATE phone_profiles SET settings = ? WHERE citizenid = ?', {
+        json.encode(settings),
+        player.PlayerData.citizenid
+    })
 end)
 
 RegisterNetEvent('qb-smartphone:server:saveContacts', function(contacts)
     local src = source
     local player = QBCore.Functions.GetPlayer(src)
     if not player then return end
-    local citizenid = player.PlayerData.citizenid
-    MySQL.update('UPDATE phone_profiles SET contacts = ? WHERE citizenid = ?', { json.encode(contacts), citizenid })
+    MySQL.update('UPDATE phone_profiles SET contacts = ? WHERE citizenid = ?', { json.encode(contacts), player.PlayerData.citizenid })
 end)
 
 RegisterNetEvent('qb-smartphone:server:saveNotes', function(notes)
     local src = source
     local player = QBCore.Functions.GetPlayer(src)
     if not player then return end
-    local citizenid = player.PlayerData.citizenid
-    MySQL.update('UPDATE phone_profiles SET notes = ? WHERE citizenid = ?', { json.encode(notes), citizenid })
+    MySQL.update('UPDATE phone_profiles SET notes = ? WHERE citizenid = ?', { json.encode(notes), player.PlayerData.citizenid })
 end)
 
 AddEventHandler('onResourceStart', function(name)
     if name ~= GetCurrentResourceName() then return end
     CreatePhoneTables()
     print('[qb-smartphone] Database initialized.')
-end)
-
-AddEventHandler('playerDropped', function()
-    PlayerPhoneCache[source] = nil
 end)

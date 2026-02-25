@@ -9,8 +9,9 @@
 <body>
   <div id="phone" class="hidden">
     <header>
+      <button class="ghost" id="homeBtn">⌂</button>
       <span id="time">00:00</span>
-      <span id="owner">Yukleniyor...</span>
+      <span id="owner">Yükleniyor...</span>
       <button id="closeBtn">✕</button>
     </header>
 
@@ -18,14 +19,14 @@
       <section id="home" class="view active"></section>
 
       <section id="contacts" class="view app-view">
-        <h3>Kisiler</h3>
-        <div class="row"><input id="contactName" placeholder="Isim" /><input id="contactNumber" placeholder="Numara" /><button id="addContact">Ekle</button></div>
+        <h3>Rehber</h3>
+        <div class="row"><input id="contactName" placeholder="İsim" /><input id="contactNumber" placeholder="Numara" /><button id="addContact">Ekle</button></div>
         <ul id="contactList"></ul>
       </section>
 
       <section id="messages" class="view app-view">
         <h3>Mesajlar</h3>
-        <div class="row"><input id="msgTo" placeholder="Numara" /><input id="msgText" placeholder="Mesaj" /><button id="sendMsg">Gonder</button></div>
+        <div class="row"><input id="msgTo" placeholder="Numara" /><input id="msgText" placeholder="Mesaj" /><button id="sendMsg">Gönder</button></div>
         <ul id="messageList"></ul>
       </section>
 
@@ -38,24 +39,19 @@
 
       <section id="camera" class="view app-view">
         <h3>Kamera</h3>
-        <input id="photoCaption" placeholder="Aciklama" />
-        <button id="captureBtn">Fotograf Cek</button>
+        <p class="hint">Çekim için <b>ENTER</b>, kamera çevirmek için <b>Sağ Tık</b>.</p>
+        <div id="cameraMode">Arka Kamera</div>
+        <input id="photoCaption" placeholder="Açıklama" />
+        <button id="captureBtn">Fotoğraf Çek</button>
       </section>
 
-      <section id="gallery" class="view app-view">
-        <h3>Galeri</h3>
-        <div id="galleryGrid"></div>
-      </section>
-
-      <section id="maps" class="view app-view">
-        <h3>Harita</h3>
-        <ul id="mapList"></ul>
-      </section>
+      <section id="gallery" class="view app-view"><h3>Galeri</h3><div id="galleryGrid"></div></section>
+      <section id="maps" class="view app-view"><h3>Harita</h3><ul id="mapList"></ul></section>
 
       <section id="browser" class="view app-view">
-        <h3>Tarayici</h3>
-        <div class="row"><input id="browserUrl" placeholder="URL" /><button id="openUrl">Ac</button></div>
-        <iframe id="browserFrame" title="Tarayici"></iframe>
+        <h3>Tarayıcı</h3>
+        <div class="row"><input id="browserUrl" placeholder="URL" /><button id="openUrl">Aç</button></div>
+        <iframe id="browserFrame" title="Tarayıcı"></iframe>
       </section>
 
       <section id="notes" class="view app-view">
@@ -74,12 +70,32 @@
 
       <section id="settings" class="view app-view">
         <h3>Ayarlar</h3>
-        <label>Wallpaper CSS<input id="wallpaperInput" /></label>
-        <button id="saveSettings">Kaydet</button>
+        <h4>Hazır Arkaplanlar</h4>
+        <div id="presetWallpapers" class="chip-grid"></div>
+        <h4>Galeriden Arkaplan</h4>
+        <div id="wallpaperFromGallery" class="chip-grid"></div>
+      </section>
+
+      <section id="appstore" class="view app-view">
+        <h3>App Store</h3>
+        <div id="storeList"></div>
+      </section>
+
+      <section id="twitter" class="view app-view">
+        <h3>Birdy</h3>
+        <div id="twitterAuth">
+          <button id="twRegister">Rastgele Hesap Oluştur</button>
+          <div class="row"><input id="twUser" placeholder="Kullanıcı adı" /><input id="twPass" placeholder="Şifre" /><button id="twLogin">Giriş</button></div>
+          <small id="twCred"></small>
+        </div>
+        <div id="twitterPanel" class="hidden">
+          <div class="row"><textarea id="twText" placeholder="Ne düşünüyorsun?"></textarea></div>
+          <div class="row"><input id="twImage" placeholder="Resim URL (opsiyonel)" /><button id="twPost">Paylaş</button></div>
+          <ul id="twFeed"></ul>
+        </div>
       </section>
     </main>
   </div>
-
   <script src="app.js"></script>
 </body>
 </html>
