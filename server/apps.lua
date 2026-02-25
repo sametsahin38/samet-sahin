@@ -88,7 +88,6 @@ local function SendMessageToNumber(source, payload)
     local targetSrc = GetSourceByPhoneNumber(receiver)
     if targetSrc then
         TriggerClientEvent('qb-smartphone:client:pushMessage', targetSrc, row)
-        TriggerClientEvent('QBCore:Notify', targetSrc, 'Yeni mesajın var.', 'primary')
     end
 
     TriggerClientEvent('qb-smartphone:client:messageSent', source)

@@ -1,25 +1,29 @@
 # qb-smartphone (QBCore)
 
-Geliştirilmiş, Türkçe QBCore telefon sistemi.
+Gerçekçiliği artırılmış, Türkçe QBCore telefon sistemi.
 
 ## Öne çıkanlar
 - F1 ile telefon açma
 - Backspace ile geri/telefon kapatma
 - Her telefona benzersiz numara atanması
-- Ana ekranda sadece bildirim alanı ve uygulama ikonları
-- Temel uygulamalar: Rehber, Mesajlar, Arama, Kamera
-- App Store: İsteğe bağlı uygulama indirme (Galeri, Harita, Tarayıcı, Notlar, Hesap, Birdy)
-- Mesajlaşma:
+- Ana ekranda sol üst bildirimler, sağ üst gerçek saat + gün
+- Temel uygulamalar: Rehber, Mesajlaşma, Arama, Kamera
+- Uygulama Mağazası: isteğe bağlı uygulama indirme
+- Mesajlaşma gerçekçi akış:
+  - Rehber kişisinden sohbet başlatma
   - Numarayla mesaj gönderme
-  - Galeriden fotoğraf mesajı gönderme
-  - Anlık konum gönderme
-  - Konum mesajına tıklayıp GPS işaretleme
-- Kamera uygulaması:
-  - Enter ile fotoğraf çekme
-  - Sağ tık ile ön/arka kamera değiştirme
-- Ayarlarda arkaplan:
-  - URL yerine hazır preset
-  - Telefonda çekilen fotoğraflardan arkaplan seçimi
+  - Galeriden fotoğraf paylaşma
+  - Anlık konum paylaşma
+  - Konum mesajından GPS'de işaretleme
+- Bildirim sistemi:
+  - Mesaj gelince ekranda önizleme uyarısı
+  - Bildirim sesi
+  - Ayarlardan Sessiz Mod ve Rahatsız Etme
+- Ayarlar:
+  - Kendi telefon numarasını en altta görme
+  - Buton boyutunu büyütme/küçültme
+  - Arkaplan özelleştirme (preset + galeriden)
+- Twitter uygulaması (eski Birdy)
 
 ## Kurulum
 1. Kaynağı `resources/[qb]/qb-smartphone` içine koyun.

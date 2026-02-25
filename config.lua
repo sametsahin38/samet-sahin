@@ -22,7 +22,7 @@ Config.WallpaperPresets = {
 
 Config.CoreApps = {
     { id = 'contacts', title = 'Rehber', icon = '👥', color = '#1d4ed8', category = 'core' },
-    { id = 'messages', title = 'Mesajlar', icon = '💬', color = '#2563eb', category = 'core' },
+    { id = 'messages', title = 'Mesajlaşma', icon = '💬', color = '#2563eb', category = 'core' },
     { id = 'phone', title = 'Arama', icon = '📞', color = '#0f766e', category = 'core' },
     { id = 'camera', title = 'Kamera', icon = '📷', color = '#334155', category = 'core' },
     { id = 'appstore', title = 'Uygulama Mağazası', icon = '🛍️', color = '#111827', category = 'core' },
@@ -35,7 +35,7 @@ Config.StoreApps = {
     { id = 'browser', title = 'Tarayıcı', icon = '🌐', color = '#0369a1', description = 'Mini web görüntüleyici.' },
     { id = 'notes', title = 'Notlar', icon = '📝', color = '#b45309', description = 'Kişisel notlar tut.' },
     { id = 'calculator', title = 'Hesap', icon = '🧮', color = '#334155', description = 'Hızlı hesap makinesi.' },
-    { id = 'twitter', title = 'Birdy', icon = '🐦', color = '#0ea5e9', description = 'Twitter benzeri sosyal akış.' }
+    { id = 'twitter', title = 'Twitter', icon = '🐦', color = '#0ea5e9', description = 'Sosyal akış uygulaması.' }
 }
 
 Config.MapLocations = {

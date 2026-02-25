@@ -2,8 +2,18 @@ local QBCore = exports['qb-core']:GetCoreObject()
 local PhoneOpen = false
 local CameraMode = false
 local CameraFront = false
+local LocalPhoneState = nil
+
+local function IsSilent()
+    return LocalPhoneState and LocalPhoneState.settings and LocalPhoneState.settings.silentMode == true
+end
+
+local function IsDnd()
+    return LocalPhoneState and LocalPhoneState.settings and LocalPhoneState.settings.doNotDisturb == true
+end
 
 local function SetPhoneState(state)
+    LocalPhoneState = state
     SendNUIMessage({ action = 'hydrate', payload = state })
 end
 
@@ -43,6 +53,9 @@ RegisterNUICallback('closePhone', function(_, cb)
 end)
 
 RegisterNUICallback('saveSettings', function(data, cb)
+    if LocalPhoneState then
+        LocalPhoneState.settings = data
+    end
     TriggerServerEvent('qb-smartphone:server:saveSettings', data)
     cb({ ok = true })
 end)
@@ -66,7 +79,6 @@ RegisterNUICallback('searchDirectory', function(data, cb)
     TriggerServerEvent('qb-smartphone:server:searchDirectory', data.query)
     cb({ ok = true })
 end)
-
 
 RegisterNUICallback('shareLocation', function(data, cb)
     TriggerServerEvent('qb-smartphone:server:sendLocationMessage', { to = data.to })
@@ -106,6 +118,19 @@ RegisterNUICallback('capturePhoto', function(data, cb)
 end)
 
 RegisterNetEvent('qb-smartphone:client:pushMessage', function(message)
+    if message and LocalPhoneState and LocalPhoneState.me and message.receiver == LocalPhoneState.me.phone then
+        if not IsDnd() then
+            local preview = tostring(message.message or '')
+            if #preview > 45 then preview = preview:sub(1, 45) .. '...' end
+            QBCore.Functions.Notify(('Yeni mesaj (%s): %s'):format(message.sender or 'Bilinmeyen', preview), 'primary')
+        end
+
+        if not IsSilent() then
+            PlaySoundFrontend(-1, 'Text_Arrive_Tone', 'Phone_SoundSet_Default', true)
+            SendNUIMessage({ action = 'playNotificationSound' })
+        end
+    end
+
     SendNUIMessage({ action = 'pushMessage', payload = message })
 end)
 

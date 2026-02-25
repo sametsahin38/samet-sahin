@@ -4,7 +4,8 @@ const state = {
   data: null,
   directoryResults: [],
   cameraFront: false,
-  twitter: { loggedIn: false, username: null, feed: [] }
+  twitter: { loggedIn: false, username: null, feed: [] },
+  selectedChatNumber: null
 };
 
 const phone = document.getElementById('phone');
@@ -15,6 +16,19 @@ const post = async (name, data = {}) => {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
   });
   try { return await resp.json(); } catch { return {}; }
+};
+
+const playNotificationBeep = () => {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(950, ctx.currentTime);
+  gain.gain.setValueAtTime(0.001, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.start(); osc.stop(ctx.currentTime + 0.22);
 };
 
 const parseMeta = (meta) => {
@@ -31,22 +45,6 @@ const normalizeMessages = () => {
   }));
 };
 
-const getUnreadCount = () => (state.data.messages || []).filter((m) => m.receiver === state.data.me.phone).length;
-
-const renderNotifications = () => {
-  const unread = getUnreadCount();
-  const notifications = document.getElementById('notifications');
-  notifications.innerHTML = `<b>Bildirimler</b><br>${unread > 0 ? `📩 ${unread} okunmamış mesaj var.` : 'Yeni bildirimin yok.'}<br>☎ Numaran: <b>${state.data.me.phone}</b>`;
-};
-
-const setView = async (id) => {
-  document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
-  const target = document.getElementById(id === 'phone' ? 'phoneapp' : id);
-  if (target) target.classList.add('active');
-  await post('setCameraMode', { enabled: id === 'camera' });
-  if (id === 'twitter') await post('twitterFeed');
-};
-
 const saveSettings = async () => post('saveSettings', state.data.settings);
 const appInstalled = (id) => !!state.data.settings.installedApps?.[id];
 
@@ -57,11 +55,40 @@ const installApp = async (id) => {
   renderStore();
 };
 
+const applyButtonScale = () => {
+  const scale = Number(state.data.settings.buttonScale || 100);
+  document.documentElement.style.setProperty('--btnScale', `${scale / 100}`);
+};
+
 const rebuildApps = () => {
   const core = state.data.coreApps || [];
   const optional = (state.data.storeApps || []).filter((a) => appInstalled(a.id));
   state.data.apps = [...core, ...optional];
   renderHome();
+};
+
+const getUnreadCount = () => (state.data.messages || []).filter((m) => m.receiver === state.data.me.phone).length;
+
+const renderHeaderClock = () => {
+  const d = new Date();
+  const days = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+  document.getElementById('dayName').textContent = days[d.getDay()];
+  document.getElementById('time').textContent = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+};
+
+const renderNotifications = () => {
+  const unread = getUnreadCount();
+  document.getElementById('notifications').innerHTML = `<b>Bildirimler</b><br>${unread > 0 ? `📩 ${unread} okunmamış mesaj` : 'Yeni bildirim yok'}<br>☎ Numaran: <b>${state.data.me.phone}</b>`;
+  document.getElementById('topLeftNotice').textContent = unread > 0 ? `Bildirimler (${unread})` : 'Bildirimler';
+};
+
+const setView = async (id) => {
+  document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
+  const target = document.getElementById(id === 'phone' ? 'phoneapp' : id);
+  if (target) target.classList.add('active');
+  await post('setCameraMode', { enabled: id === 'camera' });
+  if (id === 'twitter') await post('twitterFeed');
+  if (id === 'messages') renderMessageContacts();
 };
 
 const renderHome = () => {
@@ -86,7 +113,8 @@ const renderContacts = () => {
     li.innerHTML = `<b>${c.name}</b><br>${c.number}`;
     li.onclick = () => {
       document.getElementById('msgTo').value = c.number;
-      document.getElementById('dialNumber').value = c.number;
+      state.selectedChatNumber = c.number;
+      renderMessages();
     };
     const del = document.createElement('button');
     del.className = 'ghost';
@@ -96,8 +124,26 @@ const renderContacts = () => {
       state.data.contacts.splice(i, 1);
       await post('saveContacts', state.data.contacts);
       renderContacts();
+      renderMessageContacts();
     };
     li.appendChild(del);
+    list.appendChild(li);
+  });
+};
+
+const renderMessageContacts = () => {
+  const list = document.getElementById('chatContacts');
+  list.innerHTML = '';
+  (state.data.contacts || []).forEach((c) => {
+    const li = document.createElement('li');
+    li.className = `contact-item ${state.selectedChatNumber === c.number ? 'active' : ''}`;
+    li.innerHTML = `<b>${c.name}</b><br><small>${c.number}</small>`;
+    li.onclick = () => {
+      state.selectedChatNumber = c.number;
+      document.getElementById('msgTo').value = c.number;
+      renderMessageContacts();
+      renderMessages();
+    };
     list.appendChild(li);
   });
 };
@@ -107,7 +153,12 @@ const renderMessages = () => {
   list.innerHTML = '';
   normalizeMessages();
 
-  (state.data.messages || []).forEach((m) => {
+  const selected = state.selectedChatNumber || document.getElementById('msgTo').value.trim();
+  const visible = selected
+    ? (state.data.messages || []).filter((m) => m.sender === selected || m.receiver === selected)
+    : (state.data.messages || []);
+
+  visible.forEach((m) => {
     const li = document.createElement('li');
     if (m.msg_type === 'location') li.classList.add('message-location');
     if (m.msg_type === 'photo') li.classList.add('message-photo');
@@ -200,18 +251,15 @@ const renderGallery = () => {
 const renderStore = () => {
   const wrap = document.getElementById('storeList');
   wrap.innerHTML = '';
-
   (state.data.storeApps || []).forEach((a) => {
     const item = document.createElement('div');
     item.className = 'card';
     item.innerHTML = `<div><b>${a.icon} ${a.title}</b><br><small>${a.description || ''}</small></div>`;
-
     const btn = document.createElement('button');
     const installed = appInstalled(a.id);
     btn.textContent = installed ? 'Yüklü' : 'İndir';
     btn.disabled = installed;
     if (!installed) btn.onclick = () => installApp(a.id);
-
     item.appendChild(btn);
     wrap.appendChild(item);
   });
@@ -265,7 +313,6 @@ const applyWallpaper = () => {
 const renderPresetWallpapers = () => {
   const wrap = document.getElementById('presetWallpapers');
   wrap.innerHTML = '';
-
   (state.data.wallpaperPresets || []).forEach((preset) => {
     const b = document.createElement('button');
     b.className = 'chip';
@@ -309,9 +356,17 @@ const hydrate = (data) => {
   state.data = data;
   state.data.settings.installedApps = state.data.settings.installedApps || {};
   normalizeMessages();
-  document.getElementById('owner').innerText = `${data.me.name} (${data.me.phone})`;
+
+  document.getElementById('owner').innerText = `${data.me.name}`;
+  document.getElementById('myPhoneNumber').textContent = `Numaran: ${data.me.phone}`;
+  document.getElementById('silentMode').checked = !!state.data.settings.silentMode;
+  document.getElementById('dndMode').checked = !!state.data.settings.doNotDisturb;
+  document.getElementById('buttonScale').value = Number(state.data.settings.buttonScale || 100);
+
+  applyButtonScale();
   rebuildApps();
   renderContacts();
+  renderMessageContacts();
   renderMessages();
   renderGallery();
   renderMaps();
@@ -330,7 +385,9 @@ window.addEventListener('message', async (event) => {
   if (action === 'hydrate') hydrate(payload);
 
   if (action === 'pushMessage') {
-    state.data.messages.unshift({ ...payload, meta: parseMeta(payload.meta) });
+    const row = { ...payload, meta: parseMeta(payload.meta) };
+    state.data.messages.unshift(row);
+    if (!state.data.settings.silentMode && row.receiver === state.data.me.phone) playNotificationBeep();
     renderMessages();
   }
 
@@ -345,6 +402,7 @@ window.addEventListener('message', async (event) => {
   }
 
   if (action === 'cameraCaptureKey') document.getElementById('captureBtn').click();
+  if (action === 'playNotificationSound' && !state.data.settings.silentMode) playNotificationBeep();
 
   if (action === 'twitterFeed') {
     state.twitter.feed = payload || [];
@@ -369,10 +427,8 @@ window.addEventListener('message', async (event) => {
 document.getElementById('closeBtn').onclick = () => post('closePhone');
 document.getElementById('homeBtn').onclick = () => setView('home');
 
-setInterval(() => {
-  const n = new Date();
-  document.getElementById('time').innerText = `${String(n.getHours()).padStart(2, '0')}:${String(n.getMinutes()).padStart(2, '0')}`;
-}, 1000);
+setInterval(renderHeaderClock, 1000);
+renderHeaderClock();
 
 document.getElementById('addContact').onclick = async () => {
   const name = document.getElementById('contactName').value.trim();
@@ -381,19 +437,31 @@ document.getElementById('addContact').onclick = async () => {
   state.data.contacts.push({ name, number });
   await post('saveContacts', state.data.contacts);
   renderContacts();
+  renderMessageContacts();
+};
+
+document.getElementById('startChat').onclick = () => {
+  const to = document.getElementById('msgTo').value.trim();
+  if (!to) return;
+  state.selectedChatNumber = to;
+  renderMessageContacts();
+  renderMessages();
 };
 
 document.getElementById('sendMsg').onclick = async () => {
   const to = document.getElementById('msgTo').value.trim();
   const message = document.getElementById('msgText').value.trim();
   if (!to || !message) return;
+  state.selectedChatNumber = to;
   await post('sendMessage', { to, message, msgType: 'text' });
   document.getElementById('msgText').value = '';
+  renderMessageContacts();
 };
 
 document.getElementById('sendLocation').onclick = async () => {
   const to = document.getElementById('msgTo').value.trim();
   if (!to) return;
+  state.selectedChatNumber = to;
   await post('shareLocation', { to });
 };
 
@@ -436,6 +504,23 @@ document.getElementById('calcBtn').onclick = async () => {
   const expression = document.getElementById('calcExpr').value;
   const r = await post('calculate', { expression });
   document.getElementById('calcResult').innerText = `${r.result ?? 'Hata'}`;
+};
+
+document.getElementById('silentMode').onchange = async (e) => {
+  state.data.settings.silentMode = !!e.target.checked;
+  await saveSettings();
+};
+
+document.getElementById('dndMode').onchange = async (e) => {
+  state.data.settings.doNotDisturb = !!e.target.checked;
+  await saveSettings();
+};
+
+document.getElementById('applyButtonScale').onclick = async () => {
+  const val = Math.max(80, Math.min(140, Number(document.getElementById('buttonScale').value || 100)));
+  state.data.settings.buttonScale = val;
+  applyButtonScale();
+  await saveSettings();
 };
 
 document.getElementById('twRegister').onclick = async () => post('twitterRegister');

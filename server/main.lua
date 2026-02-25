@@ -71,7 +71,10 @@ local function ResolvePhoneProfile(citizenid)
 
     local defaultSettings = {
         wallpaper = Config.DefaultWallpaper,
-        installedApps = {}
+        installedApps = {},
+        silentMode = false,
+        doNotDisturb = false,
+        buttonScale = 100
     }
 
     MySQL.insert.await('INSERT INTO phone_profiles (citizenid, phone_number, settings, contacts, notes) VALUES (?, ?, ?, ?, ?)', {
@@ -96,6 +99,9 @@ local function BuildPhoneState(source)
     local settings = json.decode(profile.settings or '{}') or {}
     settings.installedApps = settings.installedApps or {}
     settings.wallpaper = settings.wallpaper or Config.DefaultWallpaper
+    settings.silentMode = settings.silentMode == true
+    settings.doNotDisturb = settings.doNotDisturb == true
+    settings.buttonScale = tonumber(settings.buttonScale) or 100
 
     local messages = MySQL.query.await('SELECT id, sender, receiver, message, msg_type, meta, sent_at FROM phone_messages WHERE sender = ? OR receiver = ? ORDER BY sent_at DESC LIMIT 200', {
         profile.phone_number,

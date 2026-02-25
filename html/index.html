@@ -9,8 +9,9 @@
 <body>
   <div id="phone" class="hidden">
     <header>
+      <div id="topLeftNotice">Bildirimler</div>
       <button class="ghost" id="homeBtn">⌂</button>
-      <span id="time">00:00</span>
+      <div id="clockWrap"><span id="dayName">Pzt</span> <span id="time">00:00</span></div>
       <span id="owner">Yükleniyor...</span>
       <button id="closeBtn">✕</button>
     </header>
@@ -28,11 +29,20 @@
       </section>
 
       <section id="messages" class="view app-view">
-        <h3>Mesajlar</h3>
-        <div class="row"><input id="msgTo" placeholder="Numara" /><input id="msgText" placeholder="Mesaj" /></div>
-        <div class="row"><button id="sendMsg">Mesaj Gönder</button><button id="sendLocation">Konum Gönder</button><button id="sendGalleryPhoto">Galeriden Foto</button></div>
-        <div id="photoPicker" class="chip-grid hidden"></div>
-        <ul id="messageList"></ul>
+        <h3>Mesajlaşma</h3>
+        <div class="message-layout">
+          <aside>
+            <h4>Kişiler</h4>
+            <ul id="chatContacts"></ul>
+          </aside>
+          <article>
+            <div class="row"><input id="msgTo" placeholder="Numara" /><button id="startChat">Sohbet Başlat</button></div>
+            <ul id="messageList"></ul>
+            <div class="row"><input id="msgText" placeholder="Mesaj" /></div>
+            <div class="row"><button id="sendMsg">Mesaj Gönder</button><button id="sendLocation">Konum Gönder</button><button id="sendGalleryPhoto">Galeriden Foto</button></div>
+            <div id="photoPicker" class="chip-grid hidden"></div>
+          </article>
+        </div>
       </section>
 
       <section id="phoneapp" class="view app-view">
@@ -75,26 +85,30 @@
 
       <section id="settings" class="view app-view">
         <h3>Ayarlar</h3>
+        <div class="row"><label><input type="checkbox" id="silentMode" /> Sessiz Mod</label></div>
+        <div class="row"><label><input type="checkbox" id="dndMode" /> Rahatsız Etme</label></div>
+        <div class="row"><label>Buton Boyutu %<input id="buttonScale" type="number" min="80" max="140" step="5" /></label><button id="applyButtonScale">Uygula</button></div>
         <h4>Hazır Arkaplanlar</h4>
         <div id="presetWallpapers" class="chip-grid"></div>
         <h4>Galeriden Arkaplan</h4>
         <div id="wallpaperFromGallery" class="chip-grid"></div>
+        <div class="card" id="myPhoneNumber">Numaran: -</div>
       </section>
 
       <section id="appstore" class="view app-view">
-        <h3>App Store</h3>
+        <h3>Uygulama Mağazası</h3>
         <div id="storeList"></div>
       </section>
 
       <section id="twitter" class="view app-view">
-        <h3>Birdy</h3>
+        <h3>Twitter</h3>
         <div id="twitterAuth">
           <button id="twRegister">Rastgele Hesap Oluştur</button>
           <div class="row"><input id="twUser" placeholder="Kullanıcı adı" /><input id="twPass" placeholder="Şifre" /><button id="twLogin">Giriş</button></div>
           <small id="twCred"></small>
         </div>
         <div id="twitterPanel" class="hidden">
-          <div class="row"><textarea id="twText" placeholder="Ne düşünüyorsun?"></textarea></div>
+          <div class="row"><textarea id="twText" placeholder="Neler oluyor?"></textarea></div>
           <div class="row"><input id="twImage" placeholder="Resim URL (opsiyonel)" /><button id="twPost">Paylaş</button></div>
           <ul id="twFeed"></ul>
         </div>
