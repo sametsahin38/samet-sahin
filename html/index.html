@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QBCore Telefon</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="phone" class="hidden">
+    <header>
+      <button class="ghost" id="homeBtn">⌂</button>
+      <span id="time">00:00</span>
+      <span id="owner">Yükleniyor...</span>
+      <button id="closeBtn">✕</button>
+    </header>
+
+    <main>
+      <section id="home" class="view active">
+        <div id="notifications" class="card"></div>
+        <div id="homeIcons"></div>
+      </section>
+
+      <section id="contacts" class="view app-view">
+        <h3>Rehber</h3>
+        <div class="row"><input id="contactName" placeholder="İsim" /><input id="contactNumber" placeholder="Numara" /><button id="addContact">Ekle</button></div>
+        <ul id="contactList"></ul>
+      </section>
+
+      <section id="messages" class="view app-view">
+        <h3>Mesajlar</h3>
+        <div class="row"><input id="msgTo" placeholder="Numara" /><input id="msgText" placeholder="Mesaj" /></div>
+        <div class="row"><button id="sendMsg">Mesaj Gönder</button><button id="sendLocation">Konum Gönder</button><button id="sendGalleryPhoto">Galeriden Foto</button></div>
+        <div id="photoPicker" class="chip-grid hidden"></div>
+        <ul id="messageList"></ul>
+      </section>
+
+      <section id="phoneapp" class="view app-view">
+        <h3>Arama</h3>
+        <input id="dialNumber" placeholder="Numara" />
+        <button id="dialBtn">Ara</button>
+        <div id="directoryResults"></div>
+      </section>
+
+      <section id="camera" class="view app-view">
+        <h3>Kamera</h3>
+        <p class="hint">Çekim için <b>ENTER</b>, kamera çevirmek için <b>Sağ Tık</b>.</p>
+        <div id="cameraMode">Arka Kamera</div>
+        <input id="photoCaption" placeholder="Açıklama" />
+        <button id="captureBtn">Fotoğraf Çek</button>
+      </section>
+
+      <section id="gallery" class="view app-view"><h3>Galeri</h3><div id="galleryGrid"></div></section>
+      <section id="maps" class="view app-view"><h3>Harita</h3><ul id="mapList"></ul></section>
+
+      <section id="browser" class="view app-view">
+        <h3>Tarayıcı</h3>
+        <div class="row"><input id="browserUrl" placeholder="URL" /><button id="openUrl">Aç</button></div>
+        <iframe id="browserFrame" title="Tarayıcı"></iframe>
+      </section>
+
+      <section id="notes" class="view app-view">
+        <h3>Notlar</h3>
+        <textarea id="noteText" placeholder="Not yaz..."></textarea>
+        <button id="saveNote">Not Kaydet</button>
+        <ul id="noteList"></ul>
+      </section>
+
+      <section id="calculator" class="view app-view">
+        <h3>Hesap Makinesi</h3>
+        <input id="calcExpr" placeholder="(1+2)*3" />
+        <button id="calcBtn">Hesapla</button>
+        <div id="calcResult">0</div>
+      </section>
+
+      <section id="settings" class="view app-view">
+        <h3>Ayarlar</h3>
+        <h4>Hazır Arkaplanlar</h4>
+        <div id="presetWallpapers" class="chip-grid"></div>
+        <h4>Galeriden Arkaplan</h4>
+        <div id="wallpaperFromGallery" class="chip-grid"></div>
+      </section>
+
+      <section id="appstore" class="view app-view">
+        <h3>App Store</h3>
+        <div id="storeList"></div>
+      </section>
+
+      <section id="twitter" class="view app-view">
+        <h3>Birdy</h3>
+        <div id="twitterAuth">
+          <button id="twRegister">Rastgele Hesap Oluştur</button>
+          <div class="row"><input id="twUser" placeholder="Kullanıcı adı" /><input id="twPass" placeholder="Şifre" /><button id="twLogin">Giriş</button></div>
+          <small id="twCred"></small>
+        </div>
+        <div id="twitterPanel" class="hidden">
+          <div class="row"><textarea id="twText" placeholder="Ne düşünüyorsun?"></textarea></div>
+          <div class="row"><input id="twImage" placeholder="Resim URL (opsiyonel)" /><button id="twPost">Paylaş</button></div>
+          <ul id="twFeed"></ul>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
