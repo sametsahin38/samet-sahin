@@ -16,7 +16,7 @@ body { margin: 0; background: transparent; }
 .hidden { display: none !important; }
 header {
   display: grid;
-  grid-template-columns: 1.4fr 34px 34px auto 1fr 34px;
+  grid-template-columns: 34px 34px 1.2fr auto 1fr 34px;
   align-items: center;
   gap: 6px;
   padding: 8px 10px;
@@ -28,21 +28,21 @@ header {
 #clockWrap { text-align: right; font-size: 12px; }
 #owner { opacity: .9; font-size: 11px; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-main { padding: 10px; height: calc(100% - 52px); }
+main { padding: 6px; height: calc(100% - 52px); }
 .view { display: none; height: 100%; overflow: hidden; }
 .view.active { display: block; }
 .app-view { overflow: hidden; }
-#homeIcons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px; }
+#homeIcons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
 
 .app-icon {
   border: 1px solid rgba(255,255,255,.1);
   color: #fff;
-  min-height: calc(60px * var(--btnScale));
-  border-radius: 12px;
+  min-height: calc(76px * var(--btnScale));
+  border-radius: 14px;
   cursor: pointer;
-  font-size: calc(10px * var(--btnScale));
+  font-size: calc(12px * var(--btnScale));
   font-weight: 700;
-  line-height: 1.1;
+  line-height: 1.12;
   box-shadow: 0 8px 18px rgba(0,0,0,.25);
   transition: transform .12s ease, filter .12s ease;
 }
@@ -51,13 +51,13 @@ main { padding: 10px; height: calc(100% - 52px); }
 button, input, textarea {
   border-radius: 12px;
   border: 1px solid rgba(255,255,255,.16);
-  padding: 9px 10px;
+  padding: 10px 12px;
   background: rgba(15,23,42,.72);
   color: #fff;
 }
 button {
   cursor: pointer;
-  font-size: calc(13px * var(--btnScale));
+  font-size: calc(14px * var(--btnScale));
   background: linear-gradient(180deg,#3b82f6,#1d4ed8);
   border: none;
   font-weight: 600;
@@ -69,6 +69,7 @@ button.ghost { background: rgba(15,23,42,.6); box-shadow: none; }
 .app-view h3, .app-view h4 { margin: 4px 0 8px; }
 .row { display: flex; gap: 8px; margin-bottom: 8px; align-items:center; }
 .row input, .row textarea { flex: 1; }
+.row button { flex: 1; }
 
 ul { list-style: none; padding: 0; margin: 0; max-height: 100%; overflow: auto; }
 li, .card {
@@ -80,41 +81,37 @@ li, .card {
   font-size: 12px;
 }
 
-.message-layout { display: grid; grid-template-columns: 38% 1fr; gap: 8px; height: calc(100% - 38px); }
-.message-layout aside, .message-layout article { min-height: 0; }
-.message-layout aside ul { height: 100%; }
+.message-layout { display: grid; grid-template-columns: 36% 1fr; gap: 8px; height: calc(100% - 36px); }
+.message-layout aside, .message-layout article { min-height: 0; height: 100%; }
+.message-layout aside ul { height: calc(100% - 28px); }
 .contact-item { cursor:pointer; }
 .contact-item.active { outline: 1px solid #3b82f6; }
+.message-panel { display: flex; flex-direction: column; }
 
 .chat-area {
   background: rgba(3,7,18,.35);
   border: 1px solid rgba(255,255,255,.08);
   border-radius: 12px;
   padding: 8px;
-  height: 250px;
+  flex: 1;
   overflow: auto;
   display: flex;
   flex-direction: column;
   gap: 7px;
 }
 .chat-bubble {
-  max-width: 85%;
-  padding: 8px 10px;
+  max-width: 88%;
+  padding: 9px 10px;
   border-radius: 12px;
   font-size: 12px;
-  line-height: 1.25;
+  line-height: 1.28;
 }
-.chat-bubble.me {
-  align-self: flex-end;
-  background: linear-gradient(135deg,#2563eb,#1d4ed8);
-}
-.chat-bubble.them {
-  align-self: flex-start;
-  background: rgba(51,65,85,.95);
-}
+.chat-bubble.me { align-self: flex-end; background: linear-gradient(135deg,#2563eb,#1d4ed8); }
+.chat-bubble.them { align-self: flex-start; background: rgba(51,65,85,.95); }
 .chat-meta { font-size: 10px; opacity: .85; margin-top: 4px; }
-.composer { margin-top: 8px; }
-.composer input { width: 100%; margin-bottom: 6px; }
+.action-row { margin-top: 8px; }
+.composer-bar { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-bottom: 8px; }
+.composer-bar input { width: 100%; }
 
 .message-location { border-left: 3px solid #22c55e; }
 .message-photo { border-left: 3px solid #06b6d4; }
