@@ -16,7 +16,10 @@
     </header>
 
     <main>
-      <section id="home" class="view active"></section>
+      <section id="home" class="view active">
+        <div id="notifications" class="card"></div>
+        <div id="homeIcons"></div>
+      </section>
 
       <section id="contacts" class="view app-view">
         <h3>Rehber</h3>
@@ -26,7 +29,9 @@
 
       <section id="messages" class="view app-view">
         <h3>Mesajlar</h3>
-        <div class="row"><input id="msgTo" placeholder="Numara" /><input id="msgText" placeholder="Mesaj" /><button id="sendMsg">Gönder</button></div>
+        <div class="row"><input id="msgTo" placeholder="Numara" /><input id="msgText" placeholder="Mesaj" /></div>
+        <div class="row"><button id="sendMsg">Mesaj Gönder</button><button id="sendLocation">Konum Gönder</button><button id="sendGalleryPhoto">Galeriden Foto</button></div>
+        <div id="photoPicker" class="chip-grid hidden"></div>
         <ul id="messageList"></ul>
       </section>
 

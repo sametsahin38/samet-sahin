@@ -19,9 +19,14 @@ local function CreatePhoneTables()
             `sender` VARCHAR(20) NOT NULL,
             `receiver` VARCHAR(20) NOT NULL,
             `message` TEXT NOT NULL,
+            `msg_type` VARCHAR(20) DEFAULT 'text',
+            `meta` LONGTEXT NULL,
             `sent_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     ]])
+
+    MySQL.query('ALTER TABLE `phone_messages` ADD COLUMN IF NOT EXISTS `msg_type` VARCHAR(20) DEFAULT "text"')
+    MySQL.query('ALTER TABLE `phone_messages` ADD COLUMN IF NOT EXISTS `meta` LONGTEXT NULL')
 
     MySQL.query([[
         CREATE TABLE IF NOT EXISTS `phone_gallery` (
@@ -40,19 +45,19 @@ end
 
 local function BuildInstalledApps(settings)
     local installed = settings.installedApps or {}
-    local appMap = {}
+    local apps = {}
 
     for _, app in ipairs(Config.CoreApps) do
-        table.insert(appMap, PhoneUtils.DeepCopy(app))
+        table.insert(apps, PhoneUtils.DeepCopy(app))
     end
 
     for _, app in ipairs(Config.StoreApps) do
         if installed[app.id] then
-            table.insert(appMap, PhoneUtils.DeepCopy(app))
+            table.insert(apps, PhoneUtils.DeepCopy(app))
         end
     end
 
-    return appMap
+    return apps
 end
 
 local function ResolvePhoneProfile(citizenid)
@@ -66,10 +71,7 @@ local function ResolvePhoneProfile(citizenid)
 
     local defaultSettings = {
         wallpaper = Config.DefaultWallpaper,
-        installedApps = {
-            gallery = true,
-            twitter = true
-        }
+        installedApps = {}
     }
 
     MySQL.insert.await('INSERT INTO phone_profiles (citizenid, phone_number, settings, contacts, notes) VALUES (?, ?, ?, ?, ?)', {
@@ -95,7 +97,7 @@ local function BuildPhoneState(source)
     settings.installedApps = settings.installedApps or {}
     settings.wallpaper = settings.wallpaper or Config.DefaultWallpaper
 
-    local sent = MySQL.query.await('SELECT * FROM phone_messages WHERE sender = ? OR receiver = ? ORDER BY sent_at DESC LIMIT 150', {
+    local messages = MySQL.query.await('SELECT id, sender, receiver, message, msg_type, meta, sent_at FROM phone_messages WHERE sender = ? OR receiver = ? ORDER BY sent_at DESC LIMIT 200', {
         profile.phone_number,
         profile.phone_number
     })
@@ -114,7 +116,7 @@ local function BuildPhoneState(source)
         settings = settings,
         contacts = json.decode(profile.contacts or '[]') or {},
         notes = json.decode(profile.notes or '[]') or {},
-        messages = sent or {},
+        messages = messages or {},
         gallery = gallery or {},
         apps = BuildInstalledApps(settings),
         coreApps = Config.CoreApps,
@@ -142,25 +144,19 @@ QBCore.Functions.CreateCallback('qb-smartphone:server:getPhoneState', function(s
 end)
 
 RegisterNetEvent('qb-smartphone:server:saveSettings', function(settings)
-    local src = source
-    local player = QBCore.Functions.GetPlayer(src)
+    local player = QBCore.Functions.GetPlayer(source)
     if not player then return end
-    MySQL.update('UPDATE phone_profiles SET settings = ? WHERE citizenid = ?', {
-        json.encode(settings),
-        player.PlayerData.citizenid
-    })
+    MySQL.update('UPDATE phone_profiles SET settings = ? WHERE citizenid = ?', { json.encode(settings), player.PlayerData.citizenid })
 end)
 
 RegisterNetEvent('qb-smartphone:server:saveContacts', function(contacts)
-    local src = source
-    local player = QBCore.Functions.GetPlayer(src)
+    local player = QBCore.Functions.GetPlayer(source)
     if not player then return end
     MySQL.update('UPDATE phone_profiles SET contacts = ? WHERE citizenid = ?', { json.encode(contacts), player.PlayerData.citizenid })
 end)
 
 RegisterNetEvent('qb-smartphone:server:saveNotes', function(notes)
-    local src = source
-    local player = QBCore.Functions.GetPlayer(src)
+    local player = QBCore.Functions.GetPlayer(source)
     if not player then return end
     MySQL.update('UPDATE phone_profiles SET notes = ? WHERE citizenid = ?', { json.encode(notes), player.PlayerData.citizenid })
 end)

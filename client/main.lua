@@ -67,6 +67,12 @@ RegisterNUICallback('searchDirectory', function(data, cb)
     cb({ ok = true })
 end)
 
+
+RegisterNUICallback('shareLocation', function(data, cb)
+    TriggerServerEvent('qb-smartphone:server:sendLocationMessage', { to = data.to })
+    cb({ ok = true })
+end)
+
 RegisterNUICallback('deletePhoto', function(data, cb)
     TriggerServerEvent('qb-smartphone:server:deletePhoto', data.id)
     cb({ ok = true })

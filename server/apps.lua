@@ -27,11 +27,71 @@ local function GetPlayer(source)
     return QBCore.Functions.GetPlayer(source)
 end
 
-local function GetPlayerPhoneNumber(source)
+local function GetPhoneNumberBySource(source)
     local player = GetPlayer(source)
     if not player then return nil end
     local profile = MySQL.single.await('SELECT phone_number FROM phone_profiles WHERE citizenid = ?', { player.PlayerData.citizenid })
     return profile and profile.phone_number or nil
+end
+
+local function GetSourceByPhoneNumber(phone)
+    for _, playerId in ipairs(QBCore.Functions.GetPlayers()) do
+        if GetPhoneNumberBySource(playerId) == phone then
+            return playerId
+        end
+    end
+    return nil
+end
+
+local function BuildOutgoingMessage(sender, receiver, payload)
+    local msgType = payload.msgType or 'text'
+    local message = payload.message or ''
+    local meta = payload.meta or nil
+
+    if msgType == 'photo' and payload.image then
+        meta = { image = payload.image, caption = payload.caption or '' }
+        message = payload.caption and payload.caption ~= '' and payload.caption or '📷 Fotoğraf'
+    elseif msgType == 'location' and payload.location then
+        meta = payload.location
+        message = payload.message and payload.message ~= '' and payload.message or '📍 Konum paylaşıldı'
+    end
+
+    return {
+        sender = sender,
+        receiver = receiver,
+        message = message,
+        msg_type = msgType,
+        meta = meta,
+        sent_at = os.date('%Y-%m-%d %H:%M:%S')
+    }
+end
+
+local function SendMessageToNumber(source, payload)
+    local sender = GetPhoneNumberBySource(source)
+    if not sender or PhoneUtils.IsEmpty(payload.to) then return end
+
+    local receiver = tostring(payload.to):gsub('%D', '')
+    if receiver == '' then return end
+
+    local row = BuildOutgoingMessage(sender, receiver, payload)
+
+    MySQL.insert('INSERT INTO phone_messages (sender, receiver, message, msg_type, meta) VALUES (?, ?, ?, ?, ?)', {
+        row.sender,
+        row.receiver,
+        row.message,
+        row.msg_type,
+        row.meta and json.encode(row.meta) or nil
+    })
+
+    TriggerClientEvent('qb-smartphone:client:pushMessage', source, row)
+
+    local targetSrc = GetSourceByPhoneNumber(receiver)
+    if targetSrc then
+        TriggerClientEvent('qb-smartphone:client:pushMessage', targetSrc, row)
+        TriggerClientEvent('QBCore:Notify', targetSrc, 'Yeni mesajın var.', 'primary')
+    end
+
+    TriggerClientEvent('qb-smartphone:client:messageSent', source)
 end
 
 local function randomCredential(prefix)
@@ -39,27 +99,23 @@ local function randomCredential(prefix)
 end
 
 RegisterNetEvent('qb-smartphone:server:sendMessage', function(payload)
-    local src = source
-    local sender = GetPlayerPhoneNumber(src)
-    if not sender or PhoneUtils.IsEmpty(payload.to) or PhoneUtils.IsEmpty(payload.message) then return end
+    local text = tostring((payload and payload.message) or '')
+    if payload and payload.msgType == 'text' and text == '' then return end
+    SendMessageToNumber(source, payload or {})
+end)
 
-    local receiver = tostring(payload.to):gsub('%D', '')
-    MySQL.insert('INSERT INTO phone_messages (sender, receiver, message) VALUES (?, ?, ?)', { sender, receiver, payload.message })
+RegisterNetEvent('qb-smartphone:server:sendLocationMessage', function(payload)
+    local player = GetPlayer(source)
+    if not player then return end
+    if not payload or PhoneUtils.IsEmpty(payload.to) then return end
 
-    for _, playerId in ipairs(QBCore.Functions.GetPlayers()) do
-        if GetPlayerPhoneNumber(playerId) == receiver then
-            TriggerClientEvent('qb-smartphone:client:pushMessage', playerId, {
-                sender = sender,
-                receiver = receiver,
-                message = payload.message,
-                sent_at = os.date('%Y-%m-%d %H:%M:%S')
-            })
-            TriggerClientEvent('QBCore:Notify', playerId, ('Yeni mesaj: %s'):format(payload.message), 'primary')
-            break
-        end
-    end
-
-    TriggerClientEvent('qb-smartphone:client:messageSent', src)
+    local coords = GetEntityCoords(GetPlayerPed(source))
+    SendMessageToNumber(source, {
+        to = payload.to,
+        msgType = 'location',
+        message = '📍 Anlık konum',
+        location = { x = coords.x + 0.0, y = coords.y + 0.0, z = coords.z + 0.0 }
+    })
 end)
 
 RegisterNetEvent('qb-smartphone:server:savePhoto', function(payload)
@@ -124,15 +180,11 @@ RegisterNetEvent('qb-smartphone:server:twitterLogin', function(payload)
 
     local row = MySQL.single.await('SELECT username, password FROM phone_twitter_users WHERE citizenid = ?', { player.PlayerData.citizenid })
     local ok = row and payload and payload.username == row.username and payload.password == row.password
-    TriggerClientEvent('qb-smartphone:client:twitterLoginResult', src, {
-        ok = ok,
-        username = row and row.username or nil
-    })
+    TriggerClientEvent('qb-smartphone:client:twitterLoginResult', src, { ok = ok, username = row and row.username or nil })
 end)
 
 RegisterNetEvent('qb-smartphone:server:twitterPost', function(payload)
-    local src = source
-    local player = GetPlayer(src)
+    local player = GetPlayer(source)
     if not player then return end
 
     local row = MySQL.single.await('SELECT username FROM phone_twitter_users WHERE citizenid = ?', { player.PlayerData.citizenid })

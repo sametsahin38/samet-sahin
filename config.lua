@@ -25,7 +25,7 @@ Config.CoreApps = {
     { id = 'messages', title = 'Mesajlar', icon = '💬', color = '#2563eb', category = 'core' },
     { id = 'phone', title = 'Arama', icon = '📞', color = '#0f766e', category = 'core' },
     { id = 'camera', title = 'Kamera', icon = '📷', color = '#334155', category = 'core' },
-    { id = 'appstore', title = 'App Store', icon = '🛍️', color = '#111827', category = 'core' },
+    { id = 'appstore', title = 'Uygulama Mağazası', icon = '🛍️', color = '#111827', category = 'core' },
     { id = 'settings', title = 'Ayarlar', icon = '⚙️', color = '#1f2937', category = 'core' }
 }
 
