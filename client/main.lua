@@ -181,7 +181,7 @@ end)
 CreateThread(function()
     while true do
         if PhoneOpen and IsControlJustReleased(0, Config.CloseControl) then
-            ClosePhone()
+            SendNUIMessage({ action = 'hardwareBack' })
         end
 
         if PhoneOpen and CameraMode then

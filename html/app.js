@@ -5,7 +5,8 @@ const state = {
   directoryResults: [],
   cameraFront: false,
   twitter: { loggedIn: false, username: null, feed: [] },
-  selectedChatNumber: null
+  selectedChatNumber: null,
+  currentView: 'home'
 };
 
 const phone = document.getElementById('phone');
@@ -60,13 +61,6 @@ const applyButtonScale = () => {
   document.documentElement.style.setProperty('--btnScale', `${scale / 100}`);
 };
 
-const rebuildApps = () => {
-  const core = state.data.coreApps || [];
-  const optional = (state.data.storeApps || []).filter((a) => appInstalled(a.id));
-  state.data.apps = [...core, ...optional];
-  renderHome();
-};
-
 const getUnreadCount = () => (state.data.messages || []).filter((m) => m.receiver === state.data.me.phone).length;
 
 const renderHeaderClock = () => {
@@ -86,9 +80,26 @@ const setView = async (id) => {
   document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
   const target = document.getElementById(id === 'phone' ? 'phoneapp' : id);
   if (target) target.classList.add('active');
+  state.currentView = (id === 'phone' ? 'phoneapp' : id);
+  document.getElementById('appBackBtn').classList.toggle('hidden', state.currentView === 'home');
   await post('setCameraMode', { enabled: id === 'camera' });
   if (id === 'twitter') await post('twitterFeed');
   if (id === 'messages') renderMessageContacts();
+};
+
+const goBack = async () => {
+  if (state.currentView !== 'home') {
+    await setView('home');
+  } else {
+    await post('closePhone');
+  }
+};
+
+const rebuildApps = () => {
+  const core = state.data.coreApps || [];
+  const optional = (state.data.storeApps || []).filter((a) => appInstalled(a.id));
+  state.data.apps = [...core, ...optional];
+  renderHome();
 };
 
 const renderHome = () => {
@@ -158,35 +169,36 @@ const renderMessages = () => {
     ? (state.data.messages || []).filter((m) => m.sender === selected || m.receiver === selected)
     : (state.data.messages || []);
 
-  visible.forEach((m) => {
-    const li = document.createElement('li');
-    if (m.msg_type === 'location') li.classList.add('message-location');
-    if (m.msg_type === 'photo') li.classList.add('message-photo');
-
+  visible.slice().reverse().forEach((m) => {
     const sentByMe = m.sender === state.data.me.phone;
-    let body = `<b>${sentByMe ? 'Ben' : m.sender} → ${m.receiver}</b><br>`;
+    const bubble = document.createElement('div');
+    bubble.className = `chat-bubble ${sentByMe ? 'me' : 'them'}`;
+    if (m.msg_type === 'location') bubble.classList.add('message-location');
+    if (m.msg_type === 'photo') bubble.classList.add('message-photo');
 
+    let html = '';
     if (m.msg_type === 'photo' && m.meta?.image) {
-      body += `${m.message}<br><img src="${m.meta.image}" style="max-width:100%;border-radius:8px;margin-top:6px;">`;
+      html += `${m.message}<br><img src="${m.meta.image}" style="max-width:100%;border-radius:8px;margin-top:6px;">`;
     } else if (m.msg_type === 'location' && m.meta?.x) {
-      body += `${m.message}<br><small>X:${m.meta.x.toFixed(2)} Y:${m.meta.y.toFixed(2)}</small>`;
+      html += `${m.message}<br><small>X:${m.meta.x.toFixed(2)} Y:${m.meta.y.toFixed(2)}</small>`;
     } else {
-      body += m.message;
+      html += m.message;
     }
 
-    body += `<br><small>${m.sent_at || ''}</small>`;
-    li.innerHTML = body;
+    html += `<div class="chat-meta">${sentByMe ? 'Ben' : m.sender} • ${m.sent_at || ''}</div>`;
+    bubble.innerHTML = html;
 
     if (m.msg_type === 'location' && m.meta?.x) {
       const gps = document.createElement('button');
       gps.textContent = 'GPS’de İşaretle';
       gps.onclick = () => post('setWaypoint', { coords: m.meta });
-      li.appendChild(gps);
+      bubble.appendChild(gps);
     }
 
-    list.appendChild(li);
+    list.appendChild(bubble);
   });
 
+  list.scrollTop = list.scrollHeight;
   renderNotifications();
 };
 
@@ -383,6 +395,7 @@ window.addEventListener('message', async (event) => {
 
   if (action === 'setVisible') phone.classList.toggle('hidden', !payload);
   if (action === 'hydrate') hydrate(payload);
+  if (action === 'hardwareBack') await goBack();
 
   if (action === 'pushMessage') {
     const row = { ...payload, meta: parseMeta(payload.meta) };
@@ -426,6 +439,7 @@ window.addEventListener('message', async (event) => {
 
 document.getElementById('closeBtn').onclick = () => post('closePhone');
 document.getElementById('homeBtn').onclick = () => setView('home');
+document.getElementById('appBackBtn').onclick = () => goBack();
 
 setInterval(renderHeaderClock, 1000);
 renderHeaderClock();

@@ -11,6 +11,7 @@
     <header>
       <div id="topLeftNotice">Bildirimler</div>
       <button class="ghost" id="homeBtn">⌂</button>
+      <button class="ghost hidden" id="appBackBtn">↩</button>
       <div id="clockWrap"><span id="dayName">Pzt</span> <span id="time">00:00</span></div>
       <span id="owner">Yükleniyor...</span>
       <button id="closeBtn">✕</button>
@@ -37,9 +38,11 @@
           </aside>
           <article>
             <div class="row"><input id="msgTo" placeholder="Numara" /><button id="startChat">Sohbet Başlat</button></div>
-            <ul id="messageList"></ul>
-            <div class="row"><input id="msgText" placeholder="Mesaj" /></div>
-            <div class="row"><button id="sendMsg">Mesaj Gönder</button><button id="sendLocation">Konum Gönder</button><button id="sendGalleryPhoto">Galeriden Foto</button></div>
+            <div id="messageList" class="chat-area"></div>
+            <div class="composer">
+              <input id="msgText" placeholder="Mesaj yaz..." />
+              <div class="row"><button id="sendMsg">Gönder</button><button id="sendLocation">Konum</button><button id="sendGalleryPhoto">Foto</button></div>
+            </div>
             <div id="photoPicker" class="chip-grid hidden"></div>
           </article>
         </div>

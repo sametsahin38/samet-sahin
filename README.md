@@ -7,6 +7,9 @@ Gerçekçiliği artırılmış, Türkçe QBCore telefon sistemi.
 - Backspace ile geri/telefon kapatma
 - Her telefona benzersiz numara atanması
 - Ana ekranda sol üst bildirimler, sağ üst gerçek saat + gün
+- Her uygulamada geri akışı: ekrandaki geri butonu veya Backspace ile ana ekrana dönüş
+- Mesajlaşma ekranı WhatsApp benzeri: kişi listesi + sohbet alanı + altta mesaj yazma bölümü
+- Giden/gelen mesaj balonları farklı renklerde
 - Temel uygulamalar: Rehber, Mesajlaşma, Arama, Kamera
 - Uygulama Mağazası: isteğe bağlı uygulama indirme
 - Mesajlaşma gerçekçi akış:
