@@ -1,6 +1,6 @@
 {
   "pack": {
-    "pack_format": 48,
-    "description": "TreeBreaker datapack (Forge uyumlu) - sadece dogal agac benzeri loglari kirar"
+    "pack_format": 15,
+    "description": "TreeBreaker datapack (Forge 1.20.1 uyumlu) - dogal agac benzeri loglari kirar"
   }
 }

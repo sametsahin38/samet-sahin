@@ -1,44 +1,67 @@
 # TreeBreaker (Forge uyumlu Datapack)
 
-Bu proje artık plugin değil, **datapack** olarak hazırlandı.
-Forge sunucularda/tek oyuncuda datapack desteklendiği için doğrudan kullanılabilir.
+Bu sürüm, plugin değil **datapack** olarak hazırlanmıştır.
+Özellikle **Forge 1.20.1** için uyumlu olacak şekilde düzenlenmiştir.
+
+## Neden önce görünmemiş olabilir?
+
+Ekran görüntünde `/datapack list` sadece `vanilla` gösteriyor.
+Bu genelde şu 2 sebepten olur:
+
+1. ZIP yapısı yanlış (zipin içinde ekstra klasör seviyesi var)
+2. Sürüm uyumsuz `pack_format`
+
+Bu repo içindeki sürüm şimdi `pack_format: 15` (Minecraft/Forge 1.20.1) olacak şekilde ayarlandı.
+
+## Doğru kurulum (çok önemli)
+
+### 1) ZIP'i doğru oluştur
+`datapack-treebreaker` klasörünün **içeriği** zip kökünde olmalı.
+Yani zip açılınca direkt şunlar görünmeli:
+
+- `pack.mcmeta`
+- `data/`
+
+Linux/macOS örnek:
+```bash
+cd datapack-treebreaker
+zip -r ../treebreaker-datapack.zip pack.mcmeta data
+```
+
+Windows'ta da benzer mantık: `pack.mcmeta` + `data` seçip sıkıştır.
+
+### 2) Doğru klasöre at
+- Tek oyuncu: `saves/<DunyaAdi>/datapacks/`
+- Sunucu: `<server>/world/datapacks/`
+
+### 3) Oyunda yenile
+```mcfunction
+/reload
+/datapack list available
+/datapack list enabled
+```
+
+Eğer `available` listesinde görünüp aktif değilse:
+```mcfunction
+/datapack enable "file/treebreaker-datapack.zip"
+```
 
 ## Ne yapar?
 
-- Oyuncu bir **log/stem** bloğunu kırdığında tetiklenir.
-- Sadece oyuncunun elinde **balta** varsa çalışır.
-- Kırılan logun üst tarafında yaprak kontrolü yapar.
-- Yaprak benzeri yapı yoksa (ör. odun ev), zincirleme kırma başlamaz.
-- Uygun görünüyorsa yukarı doğru sınırlı derinlikte logları temizler.
+- Oyuncu log/stem kırınca tetiklenir.
+- Sadece oyuncunun elinde balta varsa çalışır.
+- Hedef log çevresinde yaprak kontrolü yapar.
+- Yaprak yoksa (ör. odun ev), zincir kırma yapmaz.
+- Yaprak varsa yukarı doğru sınırlı şekilde logları temizler.
 
-> Not: Datapack yapısı gereği kırılan blokları `air` ile değiştirir; doğal kırılma loot mekaniği plugin kadar esnek değildir.
-
-## Kurulum (Forge)
-
-1. `datapack-treebreaker` klasörünü ZIP'e çevir:
-   - klasörün içeriği kökte kalacak şekilde paketle (`pack.mcmeta` zip kökünde olmalı).
-2. ZIP dosyasını dünya klasöründeki `datapacks/` içine at:
-   - Tek oyuncu: `saves/<DunyaAdi>/datapacks/`
-   - Sunucu: `<server>/world/datapacks/`
-3. Oyunda veya sunucu konsolunda:
-   ```mcfunction
-   /reload
-   ```
-4. Kontrol için:
-   ```mcfunction
-   /datapack list
-   ```
-
-## Proje yapısı
+## Dosyalar
 
 - `datapack-treebreaker/pack.mcmeta`
-- `data/minecraft/tags/functions/load.json`
-- `data/treebreaker/advancements/mined_log.json`
-- `data/treebreaker/functions/*.mcfunction`
+- `datapack-treebreaker/data/minecraft/tags/functions/load.json`
+- `datapack-treebreaker/data/treebreaker/advancements/mined_log.json`
+- `datapack-treebreaker/data/treebreaker/functions/*.mcfunction`
 
-## Davranış detayları
+## Komut uyumluluğu notu
 
-- `mined_log` advancement, oyuncu log kırınca `treebreaker:on_mine` fonksiyonunu çalıştırır.
-- `on_mine` fonksiyonu baltayı doğrular ve yakındaki logu hedefler.
-- `has_leaves` fonksiyonu yaprak arar; yaprak yoksa işlem iptal edilir.
-- `break_step` fonksiyonu 3x3 alanda sadece log/stem türlerini yukarı doğru sınırlı adımda temizler.
+Önceki sürümdeki `return` komutu bazı sürümlerde sorun çıkarabiliyordu.
+Bu sürümde akış scoreboard tabanlı hale getirildi; Forge 1.20.1 ile daha uyumlu.
