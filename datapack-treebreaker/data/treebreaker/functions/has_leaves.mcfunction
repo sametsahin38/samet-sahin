@@ -1,0 +1,10 @@
+execute if block ~ ~2 ~ #minecraft:leaves run scoreboard players set #has_leaf tb.leaf 1
+execute if block ~1 ~2 ~ #minecraft:leaves run scoreboard players set #has_leaf tb.leaf 1
+execute if block ~-1 ~2 ~ #minecraft:leaves run scoreboard players set #has_leaf tb.leaf 1
+execute if block ~ ~2 ~1 #minecraft:leaves run scoreboard players set #has_leaf tb.leaf 1
+execute if block ~ ~2 ~-1 #minecraft:leaves run scoreboard players set #has_leaf tb.leaf 1
+execute if block ~1 ~3 ~ #minecraft:leaves run scoreboard players set #has_leaf tb.leaf 1
+execute if block ~-1 ~3 ~ #minecraft:leaves run scoreboard players set #has_leaf tb.leaf 1
+execute if block ~ ~3 ~1 #minecraft:leaves run scoreboard players set #has_leaf tb.leaf 1
+execute if block ~ ~3 ~-1 #minecraft:leaves run scoreboard players set #has_leaf tb.leaf 1
+execute if block ~ ~4 ~ #minecraft:leaves run scoreboard players set #has_leaf tb.leaf 1

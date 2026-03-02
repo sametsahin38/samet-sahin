@@ -1,31 +1,44 @@
-# TreeBreaker (Paper/Spigot)
+# TreeBreaker (Forge uyumlu Datapack)
 
-Bu eklenti, **sadece gerçek ağaçları** zincirleme kırar.
-Odun ev, depo veya dekor amaçlı yerleştirilmiş log blokları yaprak kontrolünü geçemediği için kırılmaz.
+Bu proje artık plugin değil, **datapack** olarak hazırlandı.
+Forge sunucularda/tek oyuncuda datapack desteklendiği için doğrudan kullanılabilir.
 
-## Sorunu nasıl çözüyor?
+## Ne yapar?
 
-Buglı sürümlerde sadece "log bağlı mı" kontrolü yapıldığı için etraftaki tüm odunlar kırılabiliyor.
-Bu sürümde ek olarak:
+- Oyuncu bir **log/stem** bloğunu kırdığında tetiklenir.
+- Sadece oyuncunun elinde **balta** varsa çalışır.
+- Kırılan logun üst tarafında yaprak kontrolü yapar.
+- Yaprak benzeri yapı yoksa (ör. odun ev), zincirleme kırma başlamaz.
+- Uygun görünüyorsa yukarı doğru sınırlı derinlikte logları temizler.
 
-1. Oyuncunun baltayla kırması gerekir.
-2. Kırılan blok bir log olmalıdır.
-3. Yukarı yönde minimum gövde yüksekliği aranır (`min-trunk-height`).
-4. Kırılan blok çevresinde yeterli yaprak olmalı (`min-nearby-leaves`).
-5. Kırılacak log sayısı üst sınırla kısıtlanır (`max-logs-per-tree`).
+> Not: Datapack yapısı gereği kırılan blokları `air` ile değiştirir; doğal kırılma loot mekaniği plugin kadar esnek değildir.
 
-Bu kombinasyon, odun evlerin yanlışlıkla yok olmasını büyük ölçüde engeller.
+## Kurulum (Forge)
 
-## Derleme
+1. `datapack-treebreaker` klasörünü ZIP'e çevir:
+   - klasörün içeriği kökte kalacak şekilde paketle (`pack.mcmeta` zip kökünde olmalı).
+2. ZIP dosyasını dünya klasöründeki `datapacks/` içine at:
+   - Tek oyuncu: `saves/<DunyaAdi>/datapacks/`
+   - Sunucu: `<server>/world/datapacks/`
+3. Oyunda veya sunucu konsolunda:
+   ```mcfunction
+   /reload
+   ```
+4. Kontrol için:
+   ```mcfunction
+   /datapack list
+   ```
 
-```bash
-mvn package
-```
+## Proje yapısı
 
-Çıktı: `target/treebreaker-1.0.0.jar`
+- `datapack-treebreaker/pack.mcmeta`
+- `data/minecraft/tags/functions/load.json`
+- `data/treebreaker/advancements/mined_log.json`
+- `data/treebreaker/functions/*.mcfunction`
 
-## Kurulum
+## Davranış detayları
 
-1. JAR dosyasını sunucunun `plugins/` klasörüne at.
-2. Sunucuyu yeniden başlat.
-3. `plugins/TreeBreaker/config.yml` dosyasından eşikleri ihtiyacına göre ayarla.
+- `mined_log` advancement, oyuncu log kırınca `treebreaker:on_mine` fonksiyonunu çalıştırır.
+- `on_mine` fonksiyonu baltayı doğrular ve yakındaki logu hedefler.
+- `has_leaves` fonksiyonu yaprak arar; yaprak yoksa işlem iptal edilir.
+- `break_step` fonksiyonu 3x3 alanda sadece log/stem türlerini yukarı doğru sınırlı adımda temizler.
