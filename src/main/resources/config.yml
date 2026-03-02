@@ -1,0 +1,10 @@
+tree-break:
+  enabled: true
+  # Ağaç olarak algılanması için yukarı yönde minimum gövde log sayısı
+  min-trunk-height: 3
+  # Tek bir ağacı kırarken en fazla kaç log kırılacağı
+  max-logs-per-tree: 96
+  # Başlangıç logunun etrafında yaprak arama yarıçapı
+  leaf-scan-radius: 2
+  # Tree trigger olması için gerekli minimum yaprak sayısı
+  min-nearby-leaves: 6
